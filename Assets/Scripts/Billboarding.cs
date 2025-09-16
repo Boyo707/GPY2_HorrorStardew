@@ -3,16 +3,25 @@ using UnityEngine;
 public class Billboarding : MonoBehaviour
 {
     [SerializeField] private Vector3 rotationOffset;
-    [SerializeField] private bool lockYRotation;
-    [SerializeField] private bool lockZRotation;
-    //12 hours of work
-    private void LateUpdate()
-    {
-        transform.rotation = Camera.main.transform.rotation;
+    [SerializeField] private bool lockX;
+    [SerializeField] private bool lockY;
+    [SerializeField] private bool lockZ;
 
-        transform.rotation = Quaternion.Euler(
-            transform.localEulerAngles.x + rotationOffset.x,
-            transform.localEulerAngles.y + rotationOffset.y,
-            transform.localEulerAngles.z + rotationOffset.z);
+    private Quaternion newRotation;
+
+    private void Start()
+    {
+        Quaternion cameraRot = Camera.main.transform.rotation;
+
+        Debug.Log(cameraRot);
+
+        float x = cameraRot.x + rotationOffset.x;
+        float y = cameraRot.y + rotationOffset.y;
+        float z = cameraRot.z + rotationOffset.z;
+
+
+        newRotation = new Quaternion(x, y, z, cameraRot.w);
+
+        transform.rotation = newRotation;
     }
 }
