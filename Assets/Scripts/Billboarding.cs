@@ -13,7 +13,7 @@ public class Billboarding : MonoBehaviour
     {
         Quaternion cameraRot = Camera.main.transform.rotation;
 
-        Debug.Log(cameraRot);
+        //Debug.Log(cameraRot);
 
         float x = cameraRot.x + rotationOffset.x;
         float y = cameraRot.y + rotationOffset.y;
