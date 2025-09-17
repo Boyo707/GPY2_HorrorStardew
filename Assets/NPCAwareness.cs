@@ -10,6 +10,7 @@ public class NPCAwareness : MonoBehaviour
 
     [Header("Suspicion Settings")]
     [SerializeField] private Slider detectionSlider;
+    [SerializeField] private GameObject alertedVisual;
     [SerializeField] private float maxSuspicionLevel;
     [SerializeField] private float suspicionIncreaseSpeed;
     [SerializeField] private float suspicionDecreaseSpeed;
@@ -50,10 +51,12 @@ public class NPCAwareness : MonoBehaviour
         }
         else
         {
-            //NPC alerted state initiates 
+            alertedVisual.gameObject.SetActive(true);
         }
 
         detectionSlider.value = currentSuspicion;
+
+        detectionSlider.gameObject.SetActive(detectionSlider.value != 0 && detectionSlider.value != maxSuspicionLevel);
     }
 
 
