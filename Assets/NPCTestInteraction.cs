@@ -9,10 +9,13 @@ public class NPCTestInteraction : MonoBehaviour, IInteraction
         Dragging
     }
 
-    [SerializeField] private float interactionRange;
-    [SerializeField] private GameObject player;
+    [SerializeField] private Transform visuals;
+
+    private GameObject player;
 
     private TempNPCState currentState = TempNPCState.Idle;
+
+    Rigidbody playerRb;
 
     // Update is called once per frame
     void Update()
@@ -22,29 +25,38 @@ public class NPCTestInteraction : MonoBehaviour, IInteraction
         switch (currentState)
         {
             case TempNPCState.Idle:
-                //play animation
                 break;
             case TempNPCState.Corpse:
-                transform.parent = null;
                 break;
             case TempNPCState.Dragging:
-                transform.parent = player.transform;
+
+                if(playerRb.linearVelocity != Vector3.zero)
+                {
+                    transform.position = Vector3.Lerp(transform.position, player.transform.position - playerRb.linearVelocity.normalized, Time.deltaTime * 2);
+                }
                 break;
         }
     }
 
-    public void OnInteraction()
+    public void OnInteraction(GameObject playerRefrence)
     {
         switch (currentState)
         {
             case TempNPCState.Idle:
                 currentState += 1;
-                transform.rotation = Quaternion.Euler(transform.localEulerAngles.x, transform.localEulerAngles.y, 90);
+                visuals.rotation = Quaternion.Euler(transform.localEulerAngles.x, transform.localEulerAngles.y, 90);
+                player = playerRefrence;
+                playerRb = player.GetComponent<Rigidbody>();
+
+                //play kill animation
+
                 break;
             case TempNPCState.Corpse:
+                transform.parent = player.transform;
                 currentState += 1;
                 break;
             case TempNPCState.Dragging:
+                transform.parent = null;
                 currentState -= 1;
                 break;
         }

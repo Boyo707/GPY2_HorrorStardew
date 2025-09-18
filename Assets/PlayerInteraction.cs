@@ -2,7 +2,7 @@ using UnityEngine;
 
 public interface IInteraction
 {
-    void OnInteraction();
+    void OnInteraction(GameObject playerRefrence);
 }
 
 public class PlayerInteraction : MonoBehaviour
@@ -30,7 +30,7 @@ public class PlayerInteraction : MonoBehaviour
             {
                 //perform animation
                 Debug.Log(hitColliders[0].name);
-                hitColliders[0].GetComponent<IInteraction>().OnInteraction();
+                hitColliders[0].GetComponent<IInteraction>().OnInteraction(gameObject);
             }
         }
     }

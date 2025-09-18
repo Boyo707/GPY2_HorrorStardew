@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Billboarding : MonoBehaviour
@@ -9,9 +10,12 @@ public class Billboarding : MonoBehaviour
 
     private Quaternion newRotation;
 
+    Vector3 cameraDir;
+
     private void Start()
     {
         Quaternion cameraRot = Camera.main.transform.rotation;
+
 
         //Debug.Log(cameraRot);
 
@@ -23,5 +27,12 @@ public class Billboarding : MonoBehaviour
         newRotation = new Quaternion(x, y, z, cameraRot.w);
 
         transform.rotation = newRotation;
+    }
+
+    
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawRay(transform.position, Camera.main.transform.position - transform.position);
     }
 }
