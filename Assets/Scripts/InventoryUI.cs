@@ -29,7 +29,7 @@ public class InventoryUI : MonoBehaviour
 
         if (seedCountText != null)
         {
-            seedCountText.text = "x1"; // placeholder
+            seedCountText.text = "x1";
         }
     }
 }

@@ -26,7 +26,7 @@ public class Interactions : MonoBehaviour
 
         if (hits.Length == 0)
         {
-            Debug.Log("Raycast hit nothing.");
+            Debug.Log("hit nothing");
             return;
         }
 
@@ -42,7 +42,7 @@ public class Interactions : MonoBehaviour
 
             if (plot != null)
             {
-                Debug.Log("Ray hit plot: " + hit.collider.name + ", state = " + plot.currentState);
+                Debug.Log("hit plot: " + hit.collider.name + ", state = " + plot.currentState);
                 HandlePlotInteraction(plot);
                 plotFound = true;
                 break;
@@ -51,7 +51,6 @@ public class Interactions : MonoBehaviour
 
         if (!plotFound)
         {
-            Debug.Log("Ray hit objects, but no Plot script found.");
         }
     }
 
@@ -67,7 +66,7 @@ public class Interactions : MonoBehaviour
                 if (playerInventory != null && playerInventory.CurrentSeed != null)
                     plot.Plant(playerInventory.CurrentSeed);
                 else
-                    Debug.LogWarning("No seed selected or inventory missing!");
+                    Debug.LogWarning("select seed bumass");
                 break;
 
             case Plot.PlotState.Planted:

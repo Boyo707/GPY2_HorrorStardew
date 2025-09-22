@@ -10,9 +10,11 @@ public class Plot : MonoBehaviour
     public Material tilledMat;
     public Material plantedMat;
     public Material harvestableMat;
+    public Material wateredMat;
 
     private Crop plantedCrop;
     private Renderer plotRenderer;
+    private Item plantedSeedItem;
 
     void Start()
     {
@@ -23,58 +25,45 @@ public class Plot : MonoBehaviour
     public void Till()
     {
         if (currentState != PlotState.Empty) return;
-
         currentState = PlotState.Tilled;
         UpdateVisual();
-        Debug.Log("Plot tilled.");
     }
 
-public void Plant(Item seedItem)
-{
-    if (currentState != PlotState.Tilled || seedItem == null || seedItem.cropPrefab == null) return;
-
-    Vector3 spawnPos = transform.position + Vector3.up * 0.1f;
-    plantedCrop = Instantiate(seedItem.cropPrefab, spawnPos, Quaternion.identity, transform);
-    plantedCrop.transform.localPosition = Vector3.zero;
-    plantedCrop.transform.localRotation = Quaternion.identity;
-    plantedCrop.transform.localScale = Vector3.one;
-    plantedCrop.gameObject.SetActive(true);
-
-    plantedCrop.plantedItem = seedItem;
-
-    currentState = PlotState.Planted;
-    UpdateVisual();
-
-    Inventory playerInventory = FindObjectOfType<Inventory>();
-    if (playerInventory != null)
+    public void Plant(Item seedItem)
     {
-        playerInventory.RemoveSeed(seedItem);
-    }
+        if (currentState != PlotState.Tilled || seedItem == null || seedItem.cropPrefab == null) return;
 
-    Debug.Log("planted " + seedItem.itemName);
-}
+        plantedCrop = Instantiate(seedItem.cropPrefab, transform.position, Quaternion.identity, transform);
+        plantedCrop.transform.localPosition = new Vector3(0, 6, 0);
+        plantedCrop.transform.localScale = new Vector3(1.634f, 13.454f, 4.022f);
+        plantedCrop.plantedItem = seedItem;
+        plantedSeedItem = seedItem;
+
+        currentState = PlotState.Planted;
+        UpdateVisual();
+    }
 
     public void Water()
     {
         if (currentState != PlotState.Planted || plantedCrop == null) return;
 
         plantedCrop.Water();
+        UpdateVisual();
     }
 
     public void Harvest()
     {
         if (currentState != PlotState.Harvestable || plantedCrop == null) return;
 
-        Inventory playerInventory = FindObjectOfType<Inventory>();
-        if (playerInventory != null && plantedCrop.plantedItem != null)
+        Inventory playerInventory = Object.FindFirstObjectByType<Inventory>();
+        if (playerInventory != null && plantedSeedItem != null && plantedSeedItem.harvestProduct != null)
         {
-            playerInventory.AddItem(plantedCrop.plantedItem); // reuse original ScriptableObject
+            playerInventory.AddItem(plantedSeedItem.harvestProduct);
         }
-
-        Debug.Log("Harvested " + plantedCrop.cropName);
 
         Destroy(plantedCrop.gameObject);
         plantedCrop = null;
+        plantedSeedItem = null;
         currentState = PlotState.Tilled;
         UpdateVisual();
     }
@@ -84,6 +73,8 @@ public void Plant(Item seedItem)
         if (currentState == PlotState.Planted && plantedCrop != null)
         {
             plantedCrop.Grow();
+            plantedCrop.ResetWatering();
+
             if (plantedCrop.isMature)
                 currentState = PlotState.Harvestable;
 
@@ -95,20 +86,18 @@ public void Plant(Item seedItem)
     {
         if (plotRenderer == null) return;
 
+        if (currentState == PlotState.Planted && plantedCrop != null && plantedCrop.isWateredToday)
+        {
+            plotRenderer.material = wateredMat;
+            return;
+        }
+
         switch (currentState)
         {
-            case PlotState.Empty:
-                plotRenderer.material = emptyMat;
-                break;
-            case PlotState.Tilled:
-                plotRenderer.material = tilledMat;
-                break;
-            case PlotState.Planted:
-                plotRenderer.material = plantedMat;
-                break;
-            case PlotState.Harvestable:
-                plotRenderer.material = harvestableMat;
-                break;
+            case PlotState.Empty: plotRenderer.material = emptyMat; break;
+            case PlotState.Tilled: plotRenderer.material = tilledMat; break;
+            case PlotState.Planted: plotRenderer.material = plantedMat; break;
+            case PlotState.Harvestable: plotRenderer.material = harvestableMat; break;
         }
     }
 }
