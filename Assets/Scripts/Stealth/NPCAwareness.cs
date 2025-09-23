@@ -1,21 +1,24 @@
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class NPCAwareness : MonoBehaviour
 {
     [Header("Detection Settings")]
+    [SerializeField] private NPCWonder wonder;
+    [SerializeField] private bool showGizmos = true;
     [SerializeField] private float detectionDistance;
     [SerializeField, Range(0,125)] private float detectionRadius;
     [SerializeField] private LayerMask detectionLayer;
 
     [Header("Suspicion Settings")]
-    [SerializeField] private Slider detectionSlider;
+    [SerializeField] private GameObject detectionSliderVisual;
     [SerializeField] private GameObject alertedVisual;
     [SerializeField] private float maxSuspicionLevel;
     [SerializeField] private float suspicionIncreaseSpeed;
     [SerializeField] private float suspicionDecreaseSpeed;
     [SerializeField] private bool isAlerted;
+
+    private Slider detectionSlider;
 
     public RaycastHit[] hits;
 
@@ -25,16 +28,29 @@ public class NPCAwareness : MonoBehaviour
 
     private Transform target;
 
+    public bool IsInSight
+    {
+        get { return IsInView(); }
+    }
+
+    public bool IsAlerted
+    {
+        get { return isAlerted; }
+    }
+
     void Start()
     {
         //The z axis of the angle determines the value the dot product has to check
         fovDotProduct = (Quaternion.Euler(0, detectionRadius, 0) * transform.forward * detectionDistance).normalized.z;
+
+        detectionSlider = detectionSliderVisual.GetComponent<Slider>();
 
         detectionSlider.maxValue = maxSuspicionLevel;
     }
 
     void Update()
     {
+        transform.rotation = Quaternion.LookRotation(wonder.MoveDirection, Vector3.up);
         if (!isAlerted)
         {
             if (IsInView())
@@ -88,20 +104,29 @@ public class NPCAwareness : MonoBehaviour
         return false;
     }
 
+    public void ToggleVisuals(bool toggle)
+    {
+        detectionSlider.value = 0;
+        detectionSliderVisual.SetActive(toggle);
+        alertedVisual.SetActive(toggle);
+    }
+
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.magenta;
+        if (showGizmos)
+        {
+            Gizmos.color = Color.magenta;
 
-        //detection Sphere
-        Gizmos.DrawWireSphere(transform.position, detectionDistance);
+            //detection Sphere
+            Gizmos.DrawWireSphere(transform.position, detectionDistance);
 
-        //radius Rays
-        Gizmos.DrawRay(transform.position, Quaternion.Euler(0, detectionRadius, 0) * transform.forward * detectionDistance);
-        Gizmos.DrawRay(transform.position, Quaternion.Euler(0, -detectionRadius, 0) * transform.forward * detectionDistance);
-        Gizmos.DrawRay(transform.position, transform.forward * detectionDistance);
+            //radius Rays
+            Gizmos.DrawRay(transform.position, Quaternion.Euler(0, detectionRadius, 0) * transform.forward * detectionDistance);
+            Gizmos.DrawRay(transform.position, Quaternion.Euler(0, -detectionRadius, 0) * transform.forward * detectionDistance);
+            Gizmos.DrawRay(transform.position, transform.forward * detectionDistance);
 
-        //Ray towards player
-        Gizmos.DrawRay(transform.position, target.transform.position - transform.position);
-
+            //Ray towards player
+            Gizmos.DrawRay(transform.position, target.transform.position - transform.position);
+        }
     }
 }

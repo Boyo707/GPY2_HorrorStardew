@@ -10,6 +10,7 @@ public class NPCTestInteraction : MonoBehaviour, IInteraction
     }
 
     [SerializeField] private Transform visuals;
+    [SerializeField] private GameObject awareness;
 
     private GameObject player;
 
@@ -47,16 +48,17 @@ public class NPCTestInteraction : MonoBehaviour, IInteraction
                 visuals.rotation = Quaternion.Euler(transform.localEulerAngles.x, transform.localEulerAngles.y, 90);
                 player = playerRefrence;
                 playerRb = player.GetComponent<Rigidbody>();
-
+                awareness.GetComponent<NPCAwareness>().ToggleVisuals(false);
+                awareness.SetActive(false);
                 //play kill animation
 
                 break;
             case TempNPCState.Corpse:
-                transform.parent = player.transform;
+                //transform.parent = player.transform;
                 currentState += 1;
                 break;
             case TempNPCState.Dragging:
-                transform.parent = null;
+                //transform.parent = null;
                 currentState -= 1;
                 break;
         }

@@ -28,11 +28,4 @@ public class Billboarding : MonoBehaviour
 
         transform.rotation = newRotation;
     }
-
-    
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawRay(transform.position, Camera.main.transform.position - transform.position);
-    }
 }

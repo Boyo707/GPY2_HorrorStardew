@@ -7,10 +7,15 @@ public interface IInteraction
 
 public class PlayerInteraction : MonoBehaviour
 {
+    [SerializeField] private GameObject awareness;
+    [SerializeField] private bool showGizmos = true;
+
     [SerializeField] private float interactionRadius;
     [SerializeField] private LayerMask interactionLayer;
 
     [SerializeField] private bool isInteracting;
+
+    [SerializeField] public bool isHunting;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -33,11 +38,20 @@ public class PlayerInteraction : MonoBehaviour
                 hitColliders[0].GetComponent<IInteraction>().OnInteraction(gameObject);
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            isHunting = !isHunting;
+            awareness.SetActive(isHunting);
+        }
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(transform.position, interactionRadius);
+        if (showGizmos)
+        {
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireSphere(transform.position, interactionRadius);
+        }
     }
 }
