@@ -3,6 +3,8 @@ using UnityEngine;
 public class TestPlayerController : MonoBehaviour
 {
     [SerializeField] private float speed;
+    [SerializeField] private Animator animator;
+    [SerializeField] private SpriteRenderer sprite;
 
     private Rigidbody rb;
 
@@ -21,6 +23,13 @@ public class TestPlayerController : MonoBehaviour
         float yInput = Input.GetAxisRaw("Vertical");
 
         movementDir = new Vector3(xInput, 0, yInput).normalized;
+
+        if (xInput != 0)
+        {
+            sprite.flipX = xInput > 0;
+        }
+
+        animator.SetBool("IsWalking", xInput != 0 || yInput != 0);
     }
 
     private void FixedUpdate()

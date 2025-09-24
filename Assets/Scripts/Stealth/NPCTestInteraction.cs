@@ -9,8 +9,9 @@ public class NPCTestInteraction : MonoBehaviour, IInteraction
         Dragging
     }
 
-    [SerializeField] private Transform visuals;
     [SerializeField] private GameObject awareness;
+    [SerializeField] private NPCWonder wonder;
+    [SerializeField] private SpriteRenderer sprite;
 
     private GameObject player;
 
@@ -33,8 +34,11 @@ public class NPCTestInteraction : MonoBehaviour, IInteraction
 
                 if(playerRb.linearVelocity != Vector3.zero)
                 {
-                    transform.position = Vector3.Lerp(transform.position, player.transform.position - playerRb.linearVelocity.normalized, Time.deltaTime * 2);
+                    transform.position = Vector3.Lerp(transform.position, player.transform.position - playerRb.linearVelocity.normalized / 3, Time.deltaTime * 4);
                 }
+
+                sprite.flipX = transform.position.x < player.transform.position.x;
+
                 break;
         }
     }
@@ -45,11 +49,12 @@ public class NPCTestInteraction : MonoBehaviour, IInteraction
         {
             case TempNPCState.Idle:
                 currentState += 1;
-                visuals.rotation = Quaternion.Euler(transform.localEulerAngles.x, transform.localEulerAngles.y, 90);
                 player = playerRefrence;
                 playerRb = player.GetComponent<Rigidbody>();
                 awareness.GetComponent<NPCAwareness>().ToggleVisuals(false);
                 awareness.SetActive(false);
+                wonder.enabled = false;
+                GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
                 //play kill animation
 
                 break;
