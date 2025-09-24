@@ -126,7 +126,7 @@ public class NPCAwareness : MonoBehaviour
             Gizmos.DrawRay(transform.position, transform.forward * detectionDistance);
 
             //Ray towards player
-            Gizmos.DrawRay(transform.position, target.transform.position - transform.position);
+            //Gizmos.DrawRay(transform.position, target.transform.position - transform.position);
         }
     }
 }
