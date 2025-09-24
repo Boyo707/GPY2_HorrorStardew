@@ -12,6 +12,8 @@ public class Plot : MonoBehaviour
     public Material harvestableMat;
     public Material wateredMat;
 
+    [HideInInspector] public bool harvestedWithNPC = false;
+
     private Crop plantedCrop;
     private Renderer plotRenderer;
     private Item plantedSeedItem;
@@ -46,7 +48,6 @@ public class Plot : MonoBehaviour
     public void Water()
     {
         if (currentState != PlotState.Planted || plantedCrop == null) return;
-
         plantedCrop.Water();
         UpdateVisual();
     }
@@ -58,7 +59,11 @@ public class Plot : MonoBehaviour
         Inventory playerInventory = Object.FindFirstObjectByType<Inventory>();
         if (playerInventory != null && plantedSeedItem != null && plantedSeedItem.harvestProduct != null)
         {
-            playerInventory.AddItem(plantedSeedItem.harvestProduct);
+            int amountToGive = harvestedWithNPC ? 3 : 1;
+            for (int i = 0; i < amountToGive; i++)
+            {
+                playerInventory.AddItem(plantedSeedItem.harvestProduct);
+            }
         }
 
         Destroy(plantedCrop.gameObject);
@@ -66,8 +71,9 @@ public class Plot : MonoBehaviour
         plantedSeedItem = null;
         currentState = PlotState.Tilled;
         UpdateVisual();
-    }
 
+        harvestedWithNPC = false;
+    }
 
     public void ProgressDay()
     {
@@ -75,15 +81,12 @@ public class Plot : MonoBehaviour
         {
             plantedCrop.Grow();
             plantedCrop.ResetWatering();
-
-            if (plantedCrop.isMature)
-                currentState = PlotState.Harvestable;
-
+            if (plantedCrop.isMature) currentState = PlotState.Harvestable;
             UpdateVisual();
         }
     }
 
-    private void UpdateVisual()
+    public void UpdateVisual()
     {
         if (plotRenderer == null) return;
 

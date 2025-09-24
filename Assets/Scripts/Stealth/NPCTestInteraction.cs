@@ -14,59 +14,67 @@ public class NPCTestInteraction : MonoBehaviour, IInteraction
     [SerializeField] private SpriteRenderer sprite;
 
     private GameObject player;
-
     private TempNPCState currentState = TempNPCState.Idle;
+    private Rigidbody playerRb;
 
-    Rigidbody playerRb;
+    public static NPCTestInteraction CurrentlyDraggedNPC;
 
-    // Update is called once per frame
+    public TempNPCState CurrentState => currentState;
+
     void Update()
     {
-        //It will play a small animation of the player killing the npc
-
         switch (currentState)
         {
             case TempNPCState.Idle:
                 break;
+
             case TempNPCState.Corpse:
                 break;
-            case TempNPCState.Dragging:
 
-                if(playerRb.linearVelocity != Vector3.zero)
+            case TempNPCState.Dragging:
+                if (playerRb != null && playerRb.linearVelocity != Vector3.zero)
                 {
-                    transform.position = Vector3.Lerp(transform.position, player.transform.position - playerRb.linearVelocity.normalized / 3, Time.deltaTime * 4);
+                    transform.position = Vector3.Lerp(
+                        transform.position,
+                        player.transform.position - playerRb.linearVelocity.normalized / 3,
+                        Time.deltaTime * 4
+                    );
                 }
 
                 sprite.flipX = transform.position.x < player.transform.position.x;
-
                 break;
         }
     }
 
-    public void OnInteraction(GameObject playerRefrence)
+    public void OnInteraction(GameObject playerReference)
     {
         switch (currentState)
         {
             case TempNPCState.Idle:
-                currentState += 1;
-                player = playerRefrence;
+                currentState = TempNPCState.Corpse;
+                player = playerReference;
                 playerRb = player.GetComponent<Rigidbody>();
                 awareness.GetComponent<NPCAwareness>().ToggleVisuals(false);
                 awareness.SetActive(false);
                 wonder.enabled = false;
                 GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
-                //play kill animation
+                break;
 
-                break;
             case TempNPCState.Corpse:
-                //transform.parent = player.transform;
-                currentState += 1;
+                currentState = TempNPCState.Dragging;
+                CurrentlyDraggedNPC = this;
                 break;
+
             case TempNPCState.Dragging:
-                //transform.parent = null;
-                currentState -= 1;
+                currentState = TempNPCState.Corpse;
+                CurrentlyDraggedNPC = null;
                 break;
         }
     }
-    
+
+    private void OnDestroy()
+    {
+        if (CurrentlyDraggedNPC == this)
+            CurrentlyDraggedNPC = null;
+    }
 }

@@ -15,77 +15,72 @@ public class Interactions : MonoBehaviour
     {
         cursorManager = Object.FindFirstObjectByType<CursorManager>();
         if (cursorManager == null)
-            Debug.LogWarning("cursormanager not found");
+            Debug.LogWarning("cursor manager not found!");
     }
 
-    void Update()
+    private void Update()
     {
         HandleHover();
         if (Input.GetMouseButtonDown(0))
-        {
             TryInteract();
-        }
     }
 
-void HandleHover()
-{
-    Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
-    RaycastHit[] hits = Physics.SphereCastAll(ray, sphereRadius, interactRange);
-
-    if (hits.Length == 0)
-    {
-        cursorManager?.SetDefault();
-        return;
-    }
-
-    System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-
-    foreach (RaycastHit hit in hits)
-    {
-        Plot plot = hit.collider.GetComponent<Plot>() ?? hit.collider.GetComponentInParent<Plot>();
-        if (plot != null)
-        {
-            switch (plot.currentState)
-            {
-                case Plot.PlotState.Empty:
-                    cursorManager?.SetTill();
-                    break;
-
-                case Plot.PlotState.Tilled:
-                    if (playerInventory != null && playerInventory.CurrentSeed != null)
-                        cursorManager?.SetPlant();
-                    else
-                        cursorManager?.SetDefault();
-                    break;
-
-                case Plot.PlotState.Planted:
-                    if (plot.GetComponentInChildren<Crop>() != null && !plot.GetComponentInChildren<Crop>().isWateredToday)
-                        cursorManager?.SetWater();
-                    else
-                        cursorManager?.SetDefault();
-                    break;
-
-                case Plot.PlotState.Harvestable:
-                    cursorManager?.SetHarvest();
-                    break;
-            }
-            return;
-        }
-    }
-
-    cursorManager?.SetDefault();
-}
-
-    void TryInteract()
+    private void HandleHover()
     {
         Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit[] hits = Physics.SphereCastAll(ray, sphereRadius, interactRange);
 
         if (hits.Length == 0)
         {
-            Debug.Log("hit nothing");
+            cursorManager?.SetDefault();
             return;
         }
+
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        foreach (RaycastHit hit in hits)
+        {
+            Plot plot = hit.collider.GetComponent<Plot>() ?? hit.collider.GetComponentInParent<Plot>();
+            if (plot != null)
+            {
+                NPCTestInteraction draggedNPC = NPCTestInteraction.CurrentlyDraggedNPC;
+                bool isDraggingNPC = draggedNPC != null && draggedNPC.CurrentState == NPCTestInteraction.TempNPCState.Dragging;
+
+                if (isDraggingNPC && plot.currentState == Plot.PlotState.Planted)
+                    cursorManager?.SetDefault();
+                else
+                {
+                    switch (plot.currentState)
+                    {
+                        case Plot.PlotState.Empty: cursorManager?.SetTill(); break;
+                        case Plot.PlotState.Tilled:
+                            if (playerInventory != null && playerInventory.CurrentSeed != null)
+                                cursorManager?.SetPlant();
+                            else
+                                cursorManager?.SetDefault();
+                            break;
+                        case Plot.PlotState.Planted:
+                            if (plot.GetComponentInChildren<Crop>() != null && !plot.GetComponentInChildren<Crop>().isWateredToday)
+                                cursorManager?.SetWater();
+                            else
+                                cursorManager?.SetDefault();
+                            break;
+                        case Plot.PlotState.Harvestable: cursorManager?.SetHarvest(); break;
+                    }
+                }
+                return;
+            }
+        }
+
+        cursorManager?.SetDefault();
+    }
+
+    private void TryInteract()
+    {
+        Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
+        RaycastHit[] hits = Physics.SphereCastAll(ray, sphereRadius, interactRange);
+
+        if (hits.Length == 0) return;
 
         System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
@@ -100,28 +95,44 @@ void HandleHover()
         }
     }
 
-    void HandlePlotInteraction(Plot plot)
+    private void HandlePlotInteraction(Plot plot)
     {
-        switch (plot.currentState)
+        NPCTestInteraction draggedNPC = NPCTestInteraction.CurrentlyDraggedNPC;
+        bool isDraggingNPC = draggedNPC != null && draggedNPC.CurrentState == NPCTestInteraction.TempNPCState.Dragging;
+
+        if (isDraggingNPC && plot.currentState == Plot.PlotState.Planted)
         {
-            case Plot.PlotState.Empty:
-                plot.Till();
-                break;
+            Crop crop = plot.GetComponentInChildren<Crop>();
+            if (crop != null)
+            {
+                crop.growthCount = crop.growthStages.Length - 1;
+                crop.isMature = true;
+                crop.RefreshVisual();
+                plot.currentState = Plot.PlotState.Harvestable;
+                plot.UpdateVisual();
 
-            case Plot.PlotState.Tilled:
-                if (playerInventory != null && playerInventory.CurrentSeed != null)
-                    plot.Plant(playerInventory.CurrentSeed);
-                else
-                    Debug.LogWarning("No seed selected to plant");
-                break;
+                plot.harvestedWithNPC = true;
 
-            case Plot.PlotState.Planted:
-                plot.Water();
-                break;
+                Destroy(draggedNPC.gameObject);
+                NPCTestInteraction.CurrentlyDraggedNPC = null;
+                return;
+            }
+        }
 
-            case Plot.PlotState.Harvestable:
-                plot.Harvest();
-                break;
+        if (!isDraggingNPC)
+        {
+            switch (plot.currentState)
+            {
+                case Plot.PlotState.Empty: plot.Till(); break;
+                case Plot.PlotState.Tilled:
+                    if (playerInventory != null && playerInventory.CurrentSeed != null)
+                        plot.Plant(playerInventory.CurrentSeed);
+                    else
+                        Debug.LogWarning("No seed selected to plant");
+                    break;
+                case Plot.PlotState.Planted: plot.Water(); break;
+                case Plot.PlotState.Harvestable: plot.Harvest(); break;
+            }
         }
     }
 }

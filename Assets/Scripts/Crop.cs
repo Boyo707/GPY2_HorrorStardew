@@ -17,10 +17,7 @@ public class Crop : MonoBehaviour
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        if (growthStages == null || growthStages.Length == 0)
-        {
-            return;
-        }
+        if (growthStages == null || growthStages.Length == 0) return;
         UpdateStage();
     }
 
@@ -45,6 +42,11 @@ public class Crop : MonoBehaviour
     public void ResetWatering()
     {
         isWateredToday = false;
+    }
+
+    public void RefreshVisual()
+    {
+        UpdateStage();
     }
 
     private void UpdateStage()
