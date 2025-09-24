@@ -68,6 +68,7 @@ public class Plot : MonoBehaviour
         UpdateVisual();
     }
 
+
     public void ProgressDay()
     {
         if (currentState == PlotState.Planted && plantedCrop != null)

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9e4e84b060099374b979204083346b58, type: 3}
-  m_Name: TomatoSeed
+  m_Name: CornSeed
   m_EditorClassIdentifier: 
-  itemName: Tomato Seed
-  icon: {fileID: 21300000, guid: 88176d2fd2b2ee54a8e30d4c0a491c26, type: 3}
+  itemName: Corn Seed
+  icon: {fileID: 21300000, guid: a059429223cfd0549b066e3727beda1e, type: 3}
   cropPrefab: {fileID: 8570160248352299207, guid: 76b08f04406617f4a858f7ddd95db147, type: 3}
   isSeed: 1
   harvestProduct: {fileID: 11400000, guid: 77bcd493597ff914aa24a5304a89104c, type: 2}

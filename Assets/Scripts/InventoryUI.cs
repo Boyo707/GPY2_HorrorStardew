@@ -6,7 +6,7 @@ public class InventoryUI : MonoBehaviour
 {
     public Inventory playerInventory;
 
-    [Header("UI References")]
+    [Header("UI")]
     public Image seedIconImage;
     public TMP_Text seedCountText;
 

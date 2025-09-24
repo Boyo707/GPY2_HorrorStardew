@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7048868601418450174}
   - component: {fileID: 8570160248352299207}
   m_Layer: 0
-  m_Name: Crop
+  m_Name: PumpkinCrop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -101,12 +101,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cropName: Crop
-  daysToGrow: 3
   growthStages:
-  - {fileID: 21300000, guid: 6f8daef5277027f4b8101ea064c8991c, type: 3}
-  - {fileID: 21300000, guid: 6f2b7f2872eadd9408a3c8e611b66d9e, type: 3}
-  - {fileID: 21300000, guid: d76dff0c26703fd4788902b1e4629a98, type: 3}
-  isWateredToday: 0
-  daysGrown: 0
+  - {fileID: 21300000, guid: b55d581581b9bae428a696279095d064, type: 3}
+  - {fileID: 21300000, guid: 107938bde9409054bb8ab3c08ad7f313, type: 3}
+  - {fileID: 21300000, guid: fee34015c04d3004dbea05da70691f1c, type: 3}
+  growthCount: 0
   isMature: 0
+  isWateredToday: 0
   plantedItem: {fileID: 0}

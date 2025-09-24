@@ -9,19 +9,76 @@ public class Interactions : MonoBehaviour
     [Header("Inventory")]
     public Inventory playerInventory;
 
+    private CursorManager cursorManager;
+
+    private void Start()
+    {
+        cursorManager = Object.FindFirstObjectByType<CursorManager>();
+        if (cursorManager == null)
+            Debug.LogWarning("cursormanager not found");
+    }
+
     void Update()
     {
+        HandleHover();
         if (Input.GetMouseButtonDown(0))
         {
             TryInteract();
         }
     }
 
+void HandleHover()
+{
+    Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
+    RaycastHit[] hits = Physics.SphereCastAll(ray, sphereRadius, interactRange);
+
+    if (hits.Length == 0)
+    {
+        cursorManager?.SetDefault();
+        return;
+    }
+
+    System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+    foreach (RaycastHit hit in hits)
+    {
+        Plot plot = hit.collider.GetComponent<Plot>() ?? hit.collider.GetComponentInParent<Plot>();
+        if (plot != null)
+        {
+            switch (plot.currentState)
+            {
+                case Plot.PlotState.Empty:
+                    cursorManager?.SetTill();
+                    break;
+
+                case Plot.PlotState.Tilled:
+                    if (playerInventory != null && playerInventory.CurrentSeed != null)
+                        cursorManager?.SetPlant();
+                    else
+                        cursorManager?.SetDefault();
+                    break;
+
+                case Plot.PlotState.Planted:
+                    if (plot.GetComponentInChildren<Crop>() != null && !plot.GetComponentInChildren<Crop>().isWateredToday)
+                        cursorManager?.SetWater();
+                    else
+                        cursorManager?.SetDefault();
+                    break;
+
+                case Plot.PlotState.Harvestable:
+                    cursorManager?.SetHarvest();
+                    break;
+            }
+            return;
+        }
+    }
+
+    cursorManager?.SetDefault();
+}
+
     void TryInteract()
     {
         Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
-        Debug.DrawLine(ray.origin, ray.origin + ray.direction * interactRange, Color.red, 2f);
-
         RaycastHit[] hits = Physics.SphereCastAll(ray, sphereRadius, interactRange);
 
         if (hits.Length == 0)
@@ -32,25 +89,14 @@ public class Interactions : MonoBehaviour
 
         System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
-        bool plotFound = false;
-
         foreach (RaycastHit hit in hits)
         {
-            Debug.DrawLine(ray.origin, hit.point, Color.green, 2f);
-
             Plot plot = hit.collider.GetComponent<Plot>() ?? hit.collider.GetComponentInParent<Plot>();
-
             if (plot != null)
             {
-                Debug.Log("hit plot: " + hit.collider.name + ", state = " + plot.currentState);
                 HandlePlotInteraction(plot);
-                plotFound = true;
-                break;
+                return;
             }
-        }
-
-        if (!plotFound)
-        {
         }
     }
 
@@ -66,7 +112,7 @@ public class Interactions : MonoBehaviour
                 if (playerInventory != null && playerInventory.CurrentSeed != null)
                     plot.Plant(playerInventory.CurrentSeed);
                 else
-                    Debug.LogWarning("select seed bumass");
+                    Debug.LogWarning("No seed selected to plant");
                 break;
 
             case Plot.PlotState.Planted:
