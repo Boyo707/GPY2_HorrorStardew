@@ -1,27 +1,46 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class NPCTestInteraction : MonoBehaviour, IInteraction
 {
     public enum TempNPCState
     {
-        Idle,
-        Corpse,
-        Dragging
+        Idle,       
+        Corpse,     
+        Dragging  
     }
 
+    [Header("References")]
     [SerializeField] private GameObject awareness;
     [SerializeField] private NPCWonder wonder;
+
+    [Header("Visuals")]
     [SerializeField] private SpriteRenderer sprite;
+    [SerializeField] private Sprite aliveSprite;
+    [SerializeField] private Sprite deadSprite;
 
     private GameObject player;
-    private TempNPCState currentState = TempNPCState.Idle;
     private Rigidbody playerRb;
 
-    public static NPCTestInteraction CurrentlyDraggedNPC;
+    private TempNPCState currentState = TempNPCState.Idle;
 
+    public static NPCTestInteraction CurrentlyDraggedNPC;
     public TempNPCState CurrentState => currentState;
 
-    void Update()
+    private void Awake()
+    {
+        if (sprite == null)
+            sprite = GetComponentInChildren<SpriteRenderer>();
+    }
+
+    private void Start()
+    {
+        if (sprite != null && aliveSprite != null)
+            sprite.sprite = aliveSprite;
+        else
+            Debug.LogWarning("SpriteRenderer or AliveSprite not assigned!");
+    }
+
+    private void Update()
     {
         switch (currentState)
         {
@@ -41,7 +60,8 @@ public class NPCTestInteraction : MonoBehaviour, IInteraction
                     );
                 }
 
-                sprite.flipX = transform.position.x < player.transform.position.x;
+                if (sprite != null && player != null)
+                    sprite.flipX = transform.position.x < player.transform.position.x;
                 break;
         }
     }
@@ -54,10 +74,41 @@ public class NPCTestInteraction : MonoBehaviour, IInteraction
                 currentState = TempNPCState.Corpse;
                 player = playerReference;
                 playerRb = player.GetComponent<Rigidbody>();
-                awareness.GetComponent<NPCAwareness>().ToggleVisuals(false);
-                awareness.SetActive(false);
-                wonder.enabled = false;
-                GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+
+                if (awareness != null)
+                {
+                    NPCAwareness npcAwareness = awareness.GetComponent<NPCAwareness>();
+                    if (npcAwareness == null)
+                        npcAwareness = awareness.GetComponentInChildren<NPCAwareness>();
+
+                    if (npcAwareness != null)
+                        npcAwareness.ToggleVisuals(false);
+                    else
+                        Debug.LogWarning("No NPCAwareness component found on awareness object!");
+
+                    awareness.SetActive(false);
+                }
+                else
+                {
+                    Debug.LogWarning("Awareness object not assigned in Inspector!");
+                }
+
+                if (wonder != null)
+                    wonder.enabled = false;
+
+                var rb = GetComponent<Rigidbody>();
+                if (rb != null)
+                    rb.linearVelocity = Vector3.zero;
+
+                if (sprite != null && deadSprite != null)
+                {
+                    sprite.sprite = deadSprite;
+                    Debug.Log("NPC killed → switched to DEAD sprite");
+                }
+                else
+                {
+                    Debug.LogWarning("SpriteRenderer or DeadSprite not assigned!");
+                }
                 break;
 
             case TempNPCState.Corpse:

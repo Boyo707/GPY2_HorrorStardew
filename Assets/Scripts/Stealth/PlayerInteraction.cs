@@ -29,7 +29,6 @@ public class PlayerInteraction : MonoBehaviour
 
         if(hitColliders.Length != 0)
         {
-            Debug.Log("can interact");
 
             if (Input.GetKeyDown(KeyCode.E))
             {
